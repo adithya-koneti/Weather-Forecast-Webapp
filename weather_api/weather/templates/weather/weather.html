@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            text-align: center;
+            transition: background 0.5s; /* Smooth transition for background change */
+            background-color: #f0f0f0; /* Light gray background for default */
+        }
+
+        /* Sunny theme */
+        .sunny {
+            background: url('https://wallpaperaccess.com/full/3469082.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+
+        /* Rainy theme */
+        .heavy {
+            background: url('https://wallpaperaccess.com/rain-wallpaper-3.jpg') no-repeat center center fixed; /* Fixed URL */
+            background-size: cover;
+        }
+
+        h1 {
+            color: #333;
+        }
+        
+        input[type="text"] {
+            padding: 10px;
+            width: 200px;
+            margin-bottom: 20px;
+            border: 2px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        button {
+            padding: 10px 15px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .weather-info {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Weather App</h1>
+    <p>Enter a city name to get the weather information.</p>
+
+    <input type="text" id="city" placeholder="Enter city name">
+    <br>
+    <button onclick="getWeather()">Get Weather</button>
+
+    <div id="weather-info" class="weather-info">
+        <h3>Weather Information</h3>
+        <p id="city-name"></p>
+        <p id="temperature"></p>
+        <p id="description"></p>
+        <p id="humidity"></p>
+        <p id="wind-speed"></p>
+    </div>
+
+    <div id="error" class="error"></div>
+
+    <script>
+        async function getWeather() {
+            const city = document.getElementById('city').value;
+            const weatherInfo = document.getElementById('weather-info');
+            const errorDiv = document.getElementById('error');
+            const body = document.body;  // Get body element
+            
+            weatherInfo.style.display = 'none';
+            errorDiv.innerHTML = '';
+
+            if (!city) {
+                errorDiv.innerHTML = 'Please enter a city name.';
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/weather/?city=${city}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('city-name').innerHTML = `City: ${data.city}`;
+                    document.getElementById('temperature').innerHTML = `Temperature: ${data.temperature} °C`;
+                    document.getElementById('description').innerHTML = `Weather: ${data.description}`;
+                    document.getElementById('humidity').innerHTML = `Humidity: ${data.humidity}%`;
+                    document.getElementById('wind-speed').innerHTML = `Wind Speed: ${data.wind_speed} m/s`;
+
+                    weatherInfo.style.display = 'block';
+
+                    // Change background based on weather description
+                    if (data.description.toLowerCase().includes('rain')) {
+                        body.className = 'rainy';  // Apply rainy theme
+                    } else if (data.description.toLowerCase().includes('sun')) {
+                        body.className = 'sunny';  // Apply sunny theme
+                    } else {
+                        body.className = '';  // Reset or apply a default theme if necessary
+                    }
+
+                } else {
+                    errorDiv.innerHTML = data.error || 'Could not fetch weather data.';
+                }
+            } catch (error) {
+                errorDiv.innerHTML = 'Error: Unable to fetch weather data. Please try again later.';
+            }
+        }
+    </script>
+
+</body>
+</html>
